@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Политический Компас</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; background: #f4f4f9; padding: 20px; color: #333; }
+    .card { background: white; max-width: 600px; margin: 0 auto; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    button { display: block; width: 100%; margin: 10px 0; padding: 12px; font-size: 16px; border: none; border-radius: 6px; background: #4F46E5; color: white; cursor: pointer; transition: 0.2s; }
+    button:hover { background: #4338CA; }
+    #canvas-container { position: relative; width: 300px; height: 300px; margin: 20px auto; }
+    canvas { border: 2px solid #333; border-radius: 4px; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div id="quiz-screen">
+    <h2 id="question-text">Загрузка вопроса...</h2>
+    <div id="options"></div>
+  </div>
+
+  <div id="result-screen" class="hidden">
+    <h2>Ваш результат на компасе</h2>
+    <div id="canvas-container">
+      <canvas id="compassCanvas" width="300" height="300"></canvas>
+    </div>
+    <p id="coords-text"></p>
+    <button onclick="location.reload()">Пройти заново</button>
+  </div>
+</div>
+
+<script>
+  // ==========================================
+  // ВАШИ ВОПРОСЫ И БАЛЛЫ (X - экономика, Y - авторитаризм/свобода)
+  // ==========================================
+  const questions = [
+    {
+      text: "Государство должно строго контролировать экономику?",
+      options: [
+        { text: "Полностью согласен", x: -2, y: 0 },
+        { text: "Скорее согласен", x: -1, y: 0 },
+        { text: "Скорее не согласен", x: 1, y: 0 },
+        { text: "Совершенно не согласен", x: 2, y: 0 }
+      ]
+    },
+    {
+      text: "Свобода личности важнее порядка и безопасности государства?",
+      options: [
+        { text: "Полностью согласен", x: 0, y: -2 },
+        { text: "Скорее согласен", x: 0, y: -1 },
+        { text: "Скорее не согласен", x: 0, y: 1 },
+        { text: "Совершенно не согласен", x: 0, y: 2 }
+      ]
+    }
+  ];
+
+  let currentQuestion = 0;
+  let scoreX = 0;
+  let scoreY = 0;
+
+  function showQuestion() {
+    const q = questions[currentQuestion];
+    document.getElementById('question-text').innerText = q.text;
+    const optionsDiv = document.getElementById('options');
+    optionsDiv.innerHTML = '';
+
+    q.options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.innerText = opt.text;
+      btn.onclick = () => {
+        scoreX += opt.x;
+        scoreY += opt.y;
+        currentQuestion++;
+        if (currentQuestion < questions.length) {
+          showQuestion();
+        } else {
+          showResult();
+        }
+      };
+      optionsDiv.appendChild(btn);
+    });
+  }
+
+  function showResult() {
+    document.getElementById('quiz-screen').classList.add('hidden');
+    document.getElementById('result-screen').classList.remove('hidden');
+    document.getElementById('coords-text').innerText = `Координаты: X = ${scoreX}, Y = ${scoreY}`;
+
+    // Отрисовка компаса
+    const canvas = document.getElementById('compassCanvas');
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width;
+    const h = canvas.height;
+
+    // Квадранты (Красный, Синий, Зеленый, Желтый)
+    ctx.fillStyle = '#f87171'; ctx.fillRect(0, 0, w/2, h/2);
+    ctx.fillStyle = '#60a5fa'; ctx.fillRect(w/2, 0, w/2, h/2);
+    ctx.fillStyle = '#4ade80'; ctx.fillRect(0, h/2, w/2, h/2);
+    ctx.fillStyle = '#facc15'; ctx.fillRect(w/2, h/2, w/2, h/2);
+
+    // Оси
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(w/2, 0); ctx.lineTo(w/2, h); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, h/2); ctx.lineTo(w, h/2); ctx.stroke();
+
+    // Точка пользователя
+    // Нормализация координат от -5..5 к пикселям
+    const maxScore = 5; 
+    const pointX = (w / 2) + (scoreX / maxScore) * (w / 2);
+    const pointY = (h / 2) - (scoreY / maxScore) * (h / 2); // Минус т.к. Y в canvas идет сверху вниз
+
+    ctx.fillStyle = 'black';
+    ctx.beginPath();
+    ctx.arc(pointX, pointY, 7, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  showQuestion();
+</script>
+
+</body>
+</html>
