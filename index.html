@@ -289,7 +289,6 @@
   let rawScoreX = 0;
   let rawScoreY = 0;
 
-  // Максимально возможные баллы по осям для точного приведения к отрезку [-10, 10]
   let maxX = 0;
   let maxY = 0;
 
@@ -340,8 +339,42 @@
     });
   }
 
+  // Определение научной идеологии по координатам
+  function getScientificIdeology(x, y) {
+    const dist = Math.sqrt(x * x + y * y);
+    
+    if (dist <= 2) return "Центризм / Прагматизм";
+
+    // 1. Верхний правый: Свободный рынок + Личная свобода
+    if (x >= 0 && y >= 0) {
+      if (x <= 4 && y <= 4) return "Праволиберальный центризм";
+      if (x >= 8 || y >= 8) return "Анархо-капитализм / Волюнтаризм";
+      return "Классический либерализм (Либертарианство)";
+    }
+
+    // 2. Верхний левый: Госэкономика + Личная свобода
+    if (x < 0 && y >= 0) {
+      if (x >= -4 && y <= 4) return "Социал-демократия";
+      if (x <= -8 || y >= 8) return "Либертарный социализм";
+      return "Демократический социализм";
+    }
+
+    // 3. Нижний правый: Свободный рынок + Госконтроль
+    if (x >= 0 && y < 0) {
+      if (x <= 4 && y >= -4) return "Правый консерватизм";
+      if (x >= 8 || y <= -8) return "Авторитарный капитализм";
+      return "Патерналистский консерватизм";
+    }
+
+    // 4. Нижний левый: Госэкономика + Госконтроль
+    if (x < 0 && y < 0) {
+      if (x >= -4 && y >= -4) return "Авторитарный социализм";
+      if (x <= -8 || y <= -8) return "Тоталитарный коллективизм";
+      return "Государственный этатизм";
+    }
+  }
+
   function showResult() {
-    // Приведение суммарных очков к шкале от -10 до +10
     let finalX = Math.round((rawScoreX / maxX) * 10);
     let finalY = Math.round((rawScoreY / maxY) * 10);
 
@@ -352,12 +385,7 @@
     document.getElementById('result-screen').classList.remove('hidden');
     document.getElementById('coords-text').innerText = `Координаты: Экономика (X) = ${finalX}, Личность (Y) = ${finalY}`;
 
-    let title = "";
-    if (finalX >= 0 && finalY >= 0) title = "Полный свободолюб";
-    else if (finalX < 0 && finalY >= 0) title = "Социал-либерал";
-    else if (finalX >= 0 && finalY < 0) title = "Рыночный консерватор";
-    else title = "Консервативный социалист";
-
+    const title = getScientificIdeology(finalX, finalY);
     document.getElementById('ideology-title').innerText = title;
 
     const canvas = document.getElementById('compassCanvas');
