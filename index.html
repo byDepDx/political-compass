@@ -42,7 +42,39 @@
       border: 1px solid var(--border-color);
     }
 
-    /* Прогресс-бар */
+    /* ЭКРАН ПРИВЕТСТВИЯ */
+    .intro-title {
+      font-size: 26px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      color: var(--text-main);
+      text-align: center;
+    }
+
+    .warning-box {
+      background-color: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #78350f;
+      margin-bottom: 24px;
+    }
+
+    .warning-box ul {
+      margin-top: 8px;
+      margin-left: 20px;
+    }
+
+    .intro-description {
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    /* ПРОГРЕСС-БАР */
     .progress-header {
       display: flex;
       justify-content: space-between;
@@ -69,7 +101,7 @@
       transition: width 0.3s ease;
     }
 
-    /* Заголовок и вопрос */
+    /* ВОПРОСИ И ГЛАВЫ */
     .chapter-title {
       font-size: 13px;
       text-transform: uppercase;
@@ -88,7 +120,7 @@
       min-height: 56px;
     }
 
-    /* Варианты ответов */
+    /* КНОПКИ ВЫБОРА */
     .options-grid {
       display: flex;
       flex-direction: column;
@@ -115,7 +147,7 @@
       color: var(--primary-color);
     }
 
-    /* Кнопки навигации (Назад) */
+    /* КНОПКА НАЗАД */
     .nav-controls {
       display: flex;
       justify-content: flex-start;
@@ -150,14 +182,32 @@
       border-color: var(--border-color);
     }
 
-    /* Блок результатов */
+    /* ОСНОВНАЯ КНОПКА */
+    .primary-btn {
+      width: 100%;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 14px 24px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .primary-btn:hover {
+      background-color: var(--primary-hover);
+    }
+
+    /* ЭКРАН РЕЗУЛЬТАТОВ */
     .results-box {
       text-align: center;
       display: none;
     }
 
     .results-box h2 {
-      font-size: 22px;
+      font-size: 20px;
       margin-bottom: 8px;
       color: var(--text-muted);
     }
@@ -166,38 +216,56 @@
       font-size: 28px;
       color: var(--primary-color);
       font-weight: 800;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
 
     .coordinates-info {
-      font-size: 16px;
+      font-size: 15px;
       color: var(--text-muted);
-      margin-bottom: 24px;
+      margin-bottom: 20px;
       font-weight: 500;
     }
 
-    .restart-btn {
-      background-color: var(--primary-color);
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s ease;
+    .canvas-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 24px;
     }
 
-    .restart-btn:hover {
-      background-color: var(--primary-hover);
+    canvas {
+      border-radius: 12px;
+      background-color: #ffffff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
   </style>
 </head>
 <body>
 
   <div class="quiz-container">
-    <!-- ИНТЕРФЕЙС ТЕСТА -->
-    <div id="quiz-ui">
+    
+    <!-- 1. ЭКРАН ПРИВЕТСТВИЯ / ПРЕДУПРЕЖДЕНИЯ -->
+    <div id="intro-ui">
+      <h1 class="intro-title">Политический 2D Компас</h1>
+      
+      <div class="warning-box">
+        <strong>⚠️ Это не обычный политический компас!</strong>
+        <br><br>
+        В этом тесте нет привычных и размытых понятий «правые» и «левые», в которых часто путаются экономика и отношение к свободе личности. Мы используем точную двухмерную систему координат:
+        <ul>
+          <li><strong>Ось X (Экономика):</strong> от тотального Госплана (-10) до свободного рынка (+10).</li>
+          <li><strong>Ось Y (Личность):</strong> от тотального Госконтроля (-10) до полной Личной свободы (+10).</li>
+        </ul>
+      </div>
+
+      <p class="intro-description">
+        Тест состоит из <strong>40 вопросов</strong>, разделенных на 5 тематических глав. Отвечайте максимально искренне — здесь нет «правильных» или «неправильных» ответов.
+      </p>
+
+      <button class="primary-btn" onclick="startQuiz()">Начать тест</button>
+    </div>
+
+    <!-- 2. ИНТЕРФЕЙС ТЕСТА -->
+    <div id="quiz-ui" style="display: none;">
       <div class="progress-header">
         <span id="chapter-label" class="chapter-title">Глава 1</span>
         <span id="progress-text">1 / 40</span>
@@ -222,17 +290,24 @@
       </div>
     </div>
 
-    <!-- ИНТЕРФЕЙС РЕЗУЛЬТАТОВ -->
+    <!-- 3. ИНТЕРФЕЙС РЕЗУЛЬТАТОВ -->
     <div id="results-ui" class="results-box">
-      <h2>Ваша идеология:</h2>
+      <h2>Ваша политическая идеология:</h2>
       <div id="ideology-title" class="ideology-name">Загрузка...</div>
       <div id="coordinates-text" class="coordinates-info">X: 0, Y: 0</div>
-      <button class="restart-btn" onclick="restartQuiz()">Пройти заново</button>
+      
+      <!-- ГРАФИК КОМПАСА -->
+      <div class="canvas-container">
+        <canvas id="compassCanvas" width="340" height="340"></canvas>
+      </div>
+
+      <button class="primary-btn" onclick="restartQuiz()">Пройти заново</button>
     </div>
+
   </div>
 
   <script>
-    // ВСЕ 40 ВОПРОСОВ ПО ГЛАВАМ
+    // ВСЕ 40 ВОПРОСОВ
     const questions = [
       // Глава 1: Внешняя политика и патриотизм
       { text: "Государственные интересы и суверенитет всегда важнее международных прав человека.", axis: 'Y', multiplier: -1, chapter: "Глава 1: Внешняя политика" },
@@ -286,7 +361,14 @@
     ];
 
     let currentQuestionIndex = 0;
-    let userAnswers = []; // История ответов
+    let userAnswers = [];
+
+    // Старт теста со стартового экрана
+    function startQuiz() {
+      document.getElementById('intro-ui').style.display = 'none';
+      document.getElementById('quiz-ui').style.display = 'block';
+      renderQuestion();
+    }
 
     // Отрисовка текущего вопроса
     function renderQuestion() {
@@ -300,12 +382,11 @@
       document.getElementById('progress-text').innerText = `${currentNum} / ${totalNum}`;
       document.getElementById('progress-bar').style.width = `${(currentNum / totalNum) * 100}%`;
 
-      // Управление состоянием кнопки "Назад"
       const backBtn = document.getElementById('btn-back');
       backBtn.disabled = (currentQuestionIndex === 0);
     }
 
-    // Обработка выбора ответа
+    // Выбор ответа
     function selectOption(score) {
       userAnswers.push(score);
       currentQuestionIndex++;
@@ -317,16 +398,16 @@
       }
     }
 
-    // Функция кнопки "Назад"
+    // Возврат назад
     function prevQuestion() {
       if (currentQuestionIndex > 0) {
         currentQuestionIndex--;
-        userAnswers.pop(); // Удаляем последний сохраненный ответ
+        userAnswers.pop();
         renderQuestion();
       }
     }
 
-    // Функция определения названий идеологий (getScientificIdeology)
+    // Определение названий идеологий (getScientificIdeology)
     function getScientificIdeology(x, y) {
       const dist = Math.sqrt(x * x + y * y);
       
@@ -363,45 +444,87 @@
       return "Неопределенная позиция";
     }
 
-    // Расчет координат и вывод результата
+    // Отрисовка 2D графика на Canvas
+    function drawCompass(x, y) {
+      const canvas = document.getElementById('compassCanvas');
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+      const pad = 40; // Отступы для подписей осей
+      const plotW = w - pad * 2;
+      const plotH = h - pad * 2;
+      const centerX = pad + plotW / 2;
+      const centerY = pad + plotH / 2;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Цвета квадрантов
+      // Левый Верхний (Левый Анархизм / Социализм)
+      ctx.fillStyle = 'rgba(239, 68, 68, 0.15)';
+      ctx.fillRect(pad, pad, plotW / 2, plotH / 2);
+
+      // Правый Верхний (Либертарианство / Свободный рынок)
+      ctx.fillStyle = 'rgba(34, 197, 94, 0.15)';
+      ctx.fillRect(centerX, pad, plotW / 2, plotH / 2);
+
+      // Левый Нижний (Тоталитаризм / Госплан)
+      ctx.fillStyle = 'rgba(168, 85, 247, 0.15)';
+      ctx.fillRect(pad, centerY, plotW / 2, plotH / 2);
+
+      // Правый Нижний (Авторитарный капитализм)
+      ctx.fillStyle = 'rgba(234, 179, 8, 0.15)';
+      ctx.fillRect(centerX, centerY, plotW / 2, plotH / 2);
+
+      // Внешняя рамка
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(pad, pad, plotW, plotH);
+
+      // Главные оси X и Y
+      ctx.beginPath();
+      ctx.moveTo(centerX, pad);
+      ctx.lineTo(centerX, pad + plotH);
+      ctx.moveTo(pad, centerY);
+      ctx.lineTo(pad + plotH, centerY);
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Подписи осей
+      ctx.fillStyle = '#475569';
+      ctx.font = 'bold 11px sans-serif';
+      ctx.textAlign = 'center';
+
+      // Y-axis
+      ctx.fillText('СВОБОДА ЛИЧНОСТИ (+10)', centerX, pad - 12);
+      ctx.fillText('ГОСКОНТРОЛЬ (-10)', centerX, h - 12);
+
+      // X-axis
+      ctx.textAlign = 'left';
+      ctx.fillText('ГОСПЛАН (-10)', 5, centerY + 4);
+      ctx.textAlign = 'right';
+      ctx.fillText('РЫНОК (+10)', w - 5, centerY + 4);
+
+      // Расчет позиции точки пользователя
+      const pointX = centerX + (x / 10) * (plotW / 2);
+      const pointY = centerY - (y / 10) * (plotH / 2);
+
+      // Отрисовка внешней пульсирующей обводки
+      ctx.beginPath();
+      ctx.arc(pointX, pointY, 12, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(37, 99, 235, 0.3)';
+      ctx.fill();
+
+      // Отрисовка основной синей точки
+      ctx.beginPath();
+      ctx.arc(pointX, pointY, 7, 0, Math.PI * 2);
+      ctx.fillStyle = '#2563eb';
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#ffffff';
+      ctx.stroke();
+    }
+
+    // Расчет результатов
     function calculateAndShowResults() {
-      let rawX = 0, maxX = 0;
-      let rawY = 0, maxY = 0;
-
-      questions.forEach((q, index) => {
-        const answer = userAnswers[index];
-        if (q.axis === 'X') {
-          rawX += answer * q.multiplier;
-          maxX += 2;
-        } else if (q.axis === 'Y') {
-          rawY += answer * q.multiplier;
-          maxY += 2;
-        }
-      });
-
-      // Перевод в шкалу от -10 до +10
-      const finalX = Math.round((rawX / maxX) * 10);
-      const finalY = Math.round((rawY / maxY) * 10);
-
-      const ideology = getScientificIdeology(finalX, finalY);
-
-      document.getElementById('quiz-ui').style.display = 'none';
-      document.getElementById('results-ui').style.display = 'block';
-      document.getElementById('ideology-title').innerText = ideology;
-      document.getElementById('coordinates-text').innerText = `Координаты: X = ${finalX} (Экономика), Y = ${finalY} (Личность)`;
-    }
-
-    // Перезапуск теста
-    function restartQuiz() {
-      currentQuestionIndex = 0;
-      userAnswers = [];
-      document.getElementById('results-ui').style.display = 'none';
-      document.getElementById('quiz-ui').style.display = 'block';
-      renderQuestion();
-    }
-
-    // Старт теста
-    renderQuestion();
-  </script>
-</body>
-</html>
+      let r
