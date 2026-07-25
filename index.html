@@ -442,32 +442,49 @@
       const ctx = canvas.getContext('2d');
       const w = canvas.width;
       const h = canvas.height;
-      const pad = 40;
-      const plotW = w - pad * 2;
-      const plotH = h - pad * 2;
-      const centerX = pad + plotW / 2;
-      const centerY = pad + plotH / 2;
+      
+      // Отступы для надписей
+      const padLeftRight = 75; 
+      const padTopBottom = 35; 
+      
+      const plotW = w - padLeftRight * 2;
+      const plotH = h - padTopBottom * 2;
+      const centerX = padLeftRight + plotW / 2;
+      const centerY = padTopBottom + plotH / 2;
 
       ctx.clearRect(0, 0, w, h);
 
       // Квадранты
-      ctx.fillStyle = 'rgba(239, 68, 68, 0.15)'; ctx.fillRect(pad, pad, plotW / 2, plotH / 2);
-      ctx.fillStyle = 'rgba(34, 197, 94, 0.15)'; ctx.fillRect(centerX, pad, plotW / 2, plotH / 2);
-      ctx.fillStyle = 'rgba(168, 85, 247, 0.15)'; ctx.fillRect(pad, centerY, plotW / 2, plotH / 2);
+      ctx.fillStyle = 'rgba(239, 68, 68, 0.15)'; ctx.fillRect(padLeftRight, padTopBottom, plotW / 2, plotH / 2);
+      ctx.fillStyle = 'rgba(34, 197, 94, 0.15)'; ctx.fillRect(centerX, padTopBottom, plotW / 2, plotH / 2);
+      ctx.fillStyle = 'rgba(168, 85, 247, 0.15)'; ctx.fillRect(padLeftRight, centerY, plotW / 2, plotH / 2);
       ctx.fillStyle = 'rgba(234, 179, 8, 0.15)'; ctx.fillRect(centerX, centerY, plotW / 2, plotH / 2);
 
       // Ограничения и оси
-      ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 2; ctx.strokeRect(pad, pad, plotW, plotH);
-      ctx.beginPath(); ctx.moveTo(centerX, pad); ctx.lineTo(centerX, pad + plotH); ctx.moveTo(pad, centerY); ctx.lineTo(pad + plotH, centerY);
+      ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 2; ctx.strokeRect(padLeftRight, padTopBottom, plotW, plotH);
+      ctx.beginPath(); 
+      ctx.moveTo(centerX, padTopBottom); 
+      ctx.lineTo(centerX, padTopBottom + plotH); 
+      ctx.moveTo(padLeftRight, centerY); 
+      ctx.lineTo(padLeftRight + plotW, centerY);
       ctx.strokeStyle = '#64748b'; ctx.lineWidth = 1.5; ctx.stroke();
 
       // Подписи
-      ctx.fillStyle = '#475569'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText('СВОБОДА ЛИЧНОСТИ (+10)', centerX, pad - 12);
-      ctx.fillText('ГОСКОНТРОЛЬ (-10)', centerX, h - 12);
+      ctx.fillStyle = '#475569'; 
+      ctx.font = 'bold 10px sans-serif';
+      
+      ctx.textBaseline = 'alphabetic';
+      ctx.textAlign = 'center'; 
+      ctx.fillText('СВОБОДА ЛИЧНОСТИ (+10)', centerX, padTopBottom - 10);
+      ctx.fillText('ГОСКОНТРОЛЬ (-10)', centerX, h - 10);
 
-      ctx.textAlign = 'left'; ctx.fillText('ГОСПЛАН (-10)', 5, centerY + 4);
-      ctx.textAlign = 'right'; ctx.fillText('РЫНОК (+10)', w - 5, centerY + 4);
+      ctx.textBaseline = 'middle';
+      
+      ctx.textAlign = 'right'; 
+      ctx.fillText('ГОСПЛАН (-10)', padLeftRight - 8, centerY);
+      
+      ctx.textAlign = 'left'; 
+      ctx.fillText('РЫНОК (+10)', padLeftRight + plotW + 8, centerY);
 
       // Точка результатов
       const pointX = centerX + (x / 10) * (plotW / 2);
@@ -501,10 +518,4 @@
       document.getElementById('quiz-ui').style.display = 'none';
       document.getElementById('results-ui').style.display = 'block';
       document.getElementById('ideology-title').innerText = ideology;
-      document.getElementById('coordinates-text').innerText = `Координаты: Экономика (X) = ${finalX}, Личность (Y) = ${finalY}`;
-
-      drawCompass(finalX, finalY);
-    }
-  </script>
-</body>
-</html>
+      document.getElementById('c
