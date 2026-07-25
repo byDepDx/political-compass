@@ -243,25 +243,25 @@
 
   <div class="quiz-container">
     
-    <!-- 1. ЭКРАН ПРИВЕТСТВИЯ / ПРЕДУПРЕЖДЕНИЯ -->
+    <!-- 1. ЭКРАН ПРИВЕТСТВИЯ -->
     <div id="intro-ui">
       <h1 class="intro-title">Политический 2D Компас</h1>
       
       <div class="warning-box">
         <strong>⚠️ Это не обычный политический компас!</strong>
         <br><br>
-        В этом тесте нет привычных и размытых понятий «правые» и «левые», в которых часто путаются экономика и отношение к свободе личности. Мы используем точную двухмерную систему координат:
+        В этом тесте нет привычных понятий «правые» и «левые». Мы используем двухмерную систему координат:
         <ul>
-          <li><strong>Ось X (Экономика):</strong> от тотального Госплана (-10) до свободного рынка (+10).</li>
-          <li><strong>Ось Y (Личность):</strong> от тотального Госконтроля (-10) до полной Личной свободы (+10).</li>
+          <li><strong>Ось X (Экономика):</strong> от Госплана (-10) до Свободного рынка (+10).</li>
+          <li><strong>Ось Y (Личность):</strong> от Госконтроля (-10) до Личной свободы (+10).</li>
         </ul>
       </div>
 
       <p class="intro-description">
-        Тест состоит из <strong>40 вопросов</strong>, разделенных на 5 тематических глав. Отвечайте максимально искренне — здесь нет «правильных» или «неправильных» ответов.
+        Тест состоит из <strong>40 вопросов</strong>, разделенных на 5 тематических глав.
       </p>
 
-      <button id="btn-start" class="primary-btn">Начать тест</button>
+      <button class="primary-btn" onclick="startQuiz()">Начать тест</button>
     </div>
 
     <!-- 2. ИНТЕРФЕЙС ТЕСТА -->
@@ -277,14 +277,14 @@
       <div id="question-text" class="question-text">Загрузка вопроса...</div>
 
       <div class="options-grid">
-        <button class="option-btn" data-score="2">Полностью согласен</button>
-        <button class="option-btn" data-score="1">Скорее согласен</button>
-        <button class="option-btn" data-score="-1">Скорее не согласен</button>
-        <button class="option-btn" data-score="-2">Совершенно не согласен</button>
+        <button class="option-btn" onclick="selectOption(2)">Полностью согласен</button>
+        <button class="option-btn" onclick="selectOption(1)">Скорее согласен</button>
+        <button class="option-btn" onclick="selectOption(-1)">Скорее не согласен</button>
+        <button class="option-btn" onclick="selectOption(-2)">Совершенно не согласен</button>
       </div>
 
       <div class="nav-controls">
-        <button id="btn-back" class="btn-secondary" disabled>
+        <button id="btn-back" class="btn-secondary" onclick="prevQuestion()" disabled>
           ← Назад
         </button>
       </div>
@@ -296,20 +296,18 @@
       <div id="ideology-title" class="ideology-name">Загрузка...</div>
       <div id="coordinates-text" class="coordinates-info">X: 0, Y: 0</div>
       
-      <!-- ГРАФИК КОМПАСА -->
       <div class="canvas-container">
         <canvas id="compassCanvas" width="340" height="340"></canvas>
       </div>
 
-      <button id="btn-restart" class="primary-btn">Пройти заново</button>
+      <button class="primary-btn" onclick="restartQuiz()">Пройти заново</button>
     </div>
 
   </div>
 
   <script>
-    // БАЗА ДАННЫХ ВОПРОСОВ (40 ШТУК)
     const questions = [
-      // Глава 1: Внешняя политика и патриотизм
+      // Глава 1: Внешняя политика
       { text: "Государственные интересы и суверенитет всегда важнее международных прав человека.", axis: 'Y', multiplier: -1, chapter: "Глава 1: Внешняя политика" },
       { text: "Граждане должны безусловно поддерживать свою страну в любых внешнеполитических конфликтах.", axis: 'Y', multiplier: -1, chapter: "Глава 1: Внешняя политика" },
       { text: "Патриотическое воспитание в школах должно быть обязательным с раннего детства.", axis: 'Y', multiplier: -1, chapter: "Глава 1: Внешняя политика" },
@@ -340,7 +338,7 @@
       { text: "Цензура в искусстве, кино и литературе необходима для защиты морали.", axis: 'Y', multiplier: -1, chapter: "Глава 3: Социальные ценности" },
       { text: "Граждане должны иметь право без ограничений выбирать место жительства и выезжать из страны.", axis: 'Y', multiplier: 1, chapter: "Глава 3: Социальные ценности" },
 
-      // Глава 4: Видение общества в целом
+      // Глава 4: Общество
       { text: "Иерархия и неравенство в обществе естественны — сильные и талантливые всегда должны быть вверху.", axis: 'X', multiplier: 1, chapter: "Глава 4: Общество" },
       { text: "Соблюдение порядка и стабильности в обществе важнее, чем отдельные права человека.", axis: 'Y', multiplier: -1, chapter: "Глава 4: Общество" },
       { text: "Прогресс человечества важнее сохранения национальных и религиозных традиций.", axis: 'Y', multiplier: 1, chapter: "Глава 4: Общество" },
@@ -352,7 +350,7 @@
       { text: "Государство должно жестко бороться с экологическими загрязнениями, даже если это вредит экономическому росту.", axis: 'X', multiplier: -1, chapter: "Глава 4: Общество" },
       { text: "Управление государством нужно доверить профессиональным экспертам и ученым, а не голосовать на референдумах.", axis: 'Y', multiplier: -1, chapter: "Глава 4: Общество" },
 
-      // Глава 5: Вопросы о сексе и интимной жизни
+      // Глава 5: Личная жизнь
       { text: "Интимная жизнь граждан — это их личное дело, государство вообще не должно туда лезть.", axis: 'Y', multiplier: 1, chapter: "Глава 5: Личная жизнь" },
       { text: "Порнография и взрослый контент должны быть полностью запрещены законом.", axis: 'Y', multiplier: -1, chapter: "Глава 5: Личная жизнь" },
       { text: "Сексуальное просвещение в школах необходимо для здоровья и безопасности подростков.", axis: 'Y', multiplier: 1, chapter: "Глава 5: Личная жизнь" },
@@ -363,67 +361,27 @@
     let currentQuestionIndex = 0;
     let userAnswers = [];
 
-    // ЭЛЕМЕНТЫ DOM
-    const introUi = document.getElementById('intro-ui');
-    const quizUi = document.getElementById('quiz-ui');
-    const resultsUi = document.getElementById('results-ui');
-
-    const btnStart = document.getElementById('btn-start');
-    const btnBack = document.getElementById('btn-back');
-    const btnRestart = document.getElementById('btn-restart');
-
-    const questionText = document.getElementById('question-text');
-    const chapterLabel = document.getElementById('chapter-label');
-    const progressText = document.getElementById('progress-text');
-    const progressBar = document.getElementById('progress-bar');
-
-    // КЛИК "НАЧАТЬ ТЕСТ"
-    btnStart.onclick = function() {
-      introUi.style.display = 'none';
-      quizUi.style.display = 'block';
+    function startQuiz() {
+      document.getElementById('intro-ui').style.display = 'none';
+      document.getElementById('quiz-ui').style.display = 'block';
       renderQuestion();
-    };
+    }
 
-    // КЛИК "НАЗАД"
-    btnBack.onclick = function() {
+    function prevQuestion() {
       if (currentQuestionIndex > 0) {
         currentQuestionIndex--;
         userAnswers.pop();
         renderQuestion();
       }
-    };
-
-    // КЛИК "ПРОЙТИ ЗАНОВО"
-    btnRestart.onclick = function() {
-      currentQuestionIndex = 0;
-      userAnswers = [];
-      resultsUi.style.display = 'none';
-      introUi.style.display = 'block';
-    };
-
-    // КЛИКИ ПО ВАРИАНТАМ ОТВЕТА
-    document.querySelectorAll('.option-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const score = parseInt(e.currentTarget.getAttribute('data-score'), 10);
-        selectOption(score);
-      });
-    });
-
-    // ОТРИСОВКА ВОПРОСА
-    function renderQuestion() {
-      const q = questions[currentQuestionIndex];
-      questionText.innerText = q.text;
-      chapterLabel.innerText = q.chapter;
-
-      const currentNum = currentQuestionIndex + 1;
-      const totalNum = questions.length;
-      progressText.innerText = `${currentNum} / ${totalNum}`;
-      progressBar.style.width = `${(currentNum / totalNum) * 100}%`;
-
-      btnBack.disabled = (currentQuestionIndex === 0);
     }
 
-    // ВЫБОР ВАРИАНТА
+    function restartQuiz() {
+      currentQuestionIndex = 0;
+      userAnswers = [];
+      document.getElementById('results-ui').style.display = 'none';
+      document.getElementById('intro-ui').style.display = 'block';
+    }
+
     function selectOption(score) {
       userAnswers.push(score);
       currentQuestionIndex++;
@@ -435,7 +393,19 @@
       }
     }
 
-    // ОПРЕДЕЛЕНИЕ ИДЕОЛОГИИ
+    function renderQuestion() {
+      const q = questions[currentQuestionIndex];
+      document.getElementById('question-text').innerText = q.text;
+      document.getElementById('chapter-label').innerText = q.chapter;
+
+      const currentNum = currentQuestionIndex + 1;
+      const totalNum = questions.length;
+      document.getElementById('progress-text').innerText = `${currentNum} / ${totalNum}`;
+      document.getElementById('progress-bar').style.width = `${(currentNum / totalNum) * 100}%`;
+
+      document.getElementById('btn-back').disabled = (currentQuestionIndex === 0);
+    }
+
     function getScientificIdeology(x, y) {
       const dist = Math.sqrt(x * x + y * y);
       if (dist <= 2) return "Центризм / Прагматизм";
@@ -467,7 +437,6 @@
       return "Неопределенная позиция";
     }
 
-    // ОТРИСОВКА ГРАФИКА CANVAS
     function drawCompass(x, y) {
       const canvas = document.getElementById('compassCanvas');
       const ctx = canvas.getContext('2d');
@@ -487,7 +456,7 @@
       ctx.fillStyle = 'rgba(168, 85, 247, 0.15)'; ctx.fillRect(pad, centerY, plotW / 2, plotH / 2);
       ctx.fillStyle = 'rgba(234, 179, 8, 0.15)'; ctx.fillRect(centerX, centerY, plotW / 2, plotH / 2);
 
-      // Рамка и оси
+      // Ограничения и оси
       ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 2; ctx.strokeRect(pad, pad, plotW, plotH);
       ctx.beginPath(); ctx.moveTo(centerX, pad); ctx.lineTo(centerX, pad + plotH); ctx.moveTo(pad, centerY); ctx.lineTo(pad + plotH, centerY);
       ctx.strokeStyle = '#64748b'; ctx.lineWidth = 1.5; ctx.stroke();
@@ -509,6 +478,33 @@
       ctx.lineWidth = 2; ctx.strokeStyle = '#ffffff'; ctx.stroke();
     }
 
-    // ПОДСЧЕТ РЕЗУЛЬТАТОВ
     function calculateAndShowResults() {
-      let rawX = 0, maxX 
+      let rawX = 0, maxX = 0;
+      let rawY = 0, maxY = 0;
+
+      questions.forEach((q, index) => {
+        const answer = userAnswers[index];
+        if (q.axis === 'X') {
+          rawX += answer * q.multiplier;
+          maxX += 2;
+        } else if (q.axis === 'Y') {
+          rawY += answer * q.multiplier;
+          maxY += 2;
+        }
+      });
+
+      const finalX = Math.round((rawX / maxX) * 10);
+      const finalY = Math.round((rawY / maxY) * 10);
+
+      const ideology = getScientificIdeology(finalX, finalY);
+
+      document.getElementById('quiz-ui').style.display = 'none';
+      document.getElementById('results-ui').style.display = 'block';
+      document.getElementById('ideology-title').innerText = ideology;
+      document.getElementById('coordinates-text').innerText = `Координаты: Экономика (X) = ${finalX}, Личность (Y) = ${finalY}`;
+
+      drawCompass(finalX, finalY);
+    }
+  </script>
+</body>
+</html>
