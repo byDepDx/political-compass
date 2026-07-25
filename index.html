@@ -5,40 +5,68 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Политический Компас</title>
   <style>
-    body { font-family: sans-serif; text-align: center; background: #f4f4f9; padding: 20px; color: #333; }
-    .card { background: white; max-width: 600px; margin: 0 auto; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-    button { display: block; width: 100%; margin: 10px 0; padding: 12px; font-size: 16px; border: none; border-radius: 6px; background: #4F46E5; color: white; cursor: pointer; transition: 0.2s; }
-    button:hover { background: #4338CA; }
-    #canvas-container { position: relative; width: 300px; height: 300px; margin: 20px auto; }
-    canvas { border: 2px solid #333; border-radius: 4px; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background: #f0f2f5; padding: 20px; color: #1c1e21; }
+    .card { background: white; max-width: 650px; margin: 0 auto; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: left; }
+    h1, h2 { text-align: center; color: #111; margin-top: 0; }
+    .notice-box { background: #eff6ff; border-left: 4px solid #2563eb; padding: 16px; border-radius: 6px; margin: 20px 0; line-height: 1.5; color: #1e3a8a; }
+    .btn-option { display: block; width: 100%; margin: 10px 0; padding: 14px; font-size: 16px; border: 1px solid #e4e6eb; border-radius: 8px; background: #f7f8fa; color: #050505; cursor: pointer; transition: 0.2s; font-weight: 500; text-align: center; }
+    .btn-option:hover { background: #e4e6eb; }
+    .btn-primary { background: #2563eb; color: white; border: none; font-weight: 600; font-size: 18px; margin-top: 10px; }
+    .btn-primary:hover { background: #1d4ed8; }
+    #canvas-container { position: relative; width: 320px; height: 320px; margin: 20px auto; }
+    canvas { border: 2px solid #333; border-radius: 6px; }
+    .result-title { font-size: 22px; font-weight: bold; color: #2563eb; margin-top: 15px; text-align: center; }
     .hidden { display: none; }
+    .progress { font-size: 14px; color: #65676b; margin-bottom: 15px; text-align: center; }
   </style>
 </head>
 <body>
 
 <div class="card">
-  <div id="quiz-screen">
-    <h2 id="question-text">Загрузка вопроса...</h2>
+  <!-- СТАРТОВЫЙ ЭКРАН С ПРЕДУПРЕЖДЕНИЕМ -->
+  <div id="welcome-screen">
+    <h1>Политический Компас</h1>
+    
+    <div class="notice-box">
+      <strong>💡 Обратите внимание:</strong><br>
+      Этот тест основан на **альтернативной двухмерной модели**. В отличие от классического политического компаса, здесь нет привычного деления на «левых» и «правых». 
+      <br><br>
+      Ваши взгляды оцениваются по двум независимым осям: 
+      <strong>Личные права</strong> (свобода выбора и образа жизни) и <strong>Экономическая свобода</strong> (рынок и бизнес).
+    </div>
+
+    <button class="btn-option btn-primary" onclick="startQuiz()">Начать тест</button>
+  </div>
+
+  <!-- ЭКРАН ВОПРОСОВ -->
+  <div id="quiz-screen" class="hidden">
+    <div id="progress" class="progress">Вопрос 1</div>
+    <h2 id="question-text" style="text-align: left;">Загрузка...</h2>
     <div id="options"></div>
   </div>
 
-  <div id="result-screen" class="hidden">
-    <h2>Ваш результат на компасе</h2>
+  <!-- ЭКРАН РЕЗУЛЬТАТА -->
+  <div id="result-screen" class="hidden" style="text-align: center;">
+    <h2>Ваш результат</h2>
     <div id="canvas-container">
-      <canvas id="compassCanvas" width="300" height="300"></canvas>
+      <canvas id="compassCanvas" width="320" height="320"></canvas>
     </div>
-    <p id="coords-text"></p>
-    <button onclick="location.reload()">Пройти заново</button>
+    <div id="ideology-title" class="result-title"></div>
+    <p id="coords-text" style="color: #65676b; font-size: 15px;"></p>
+    <button class="btn-option btn-primary" onclick="location.reload()">Пройти заново</button>
   </div>
 </div>
 
 <script>
   // ==========================================
-  // ВАШИ ВОПРОСЫ И БАЛЛЫ (X - экономика, Y - авторитаризм/свобода)
+  // БАЗОВЫЕ 12 ВОПРОСОВ (по 6 на каждую ось)
+  // X: Экономика (-10 Госэкономика ... +10 Свободный рынок)
+  // Y: Личные права (-10 Госконтроль ... +10 Личная свобода)
   // ==========================================
   const questions = [
+    // --- ЭКОНОМИКА (X) ---
     {
-      text: "Государство должно строго контролировать экономику?",
+      text: "Крупные предприятия, ресурсы и энергетика должны принадлежать государству, а не частным лицам.",
       options: [
         { text: "Полностью согласен", x: -2, y: 0 },
         { text: "Скорее согласен", x: -1, y: 0 },
@@ -47,12 +75,104 @@
       ]
     },
     {
-      text: "Свобода личности важнее порядка и безопасности государства?",
+      text: "Государство не должно вмешиваться в работу бизнеса и регулировать цены на товары.",
+      options: [
+        { text: "Полностью согласен", x: 2, y: 0 },
+        { text: "Скорее согласен", x: 1, y: 0 },
+        { text: "Скорее не согласен", x: -1, y: 0 },
+        { text: "Совершенно не согласен", x: -2, y: 0 }
+      ]
+    },
+    {
+      text: "Богатые граждане должны платить существенно более высокий процент налогов, чем люди с низким доходом.",
+      options: [
+        { text: "Полностью согласен", x: -2, y: 0 },
+        { text: "Скорее согласен", x: -1, y: 0 },
+        { text: "Скорее не согласен", x: 1, y: 0 },
+        { text: "Совершенно не согласен", x: 2, y: 0 }
+      ]
+    },
+    {
+      text: "Каждый человек должен самостоятельно заботиться о своей пенсии и медицине, а не рассчитывать на госвыплаты.",
+      options: [
+        { text: "Полностью согласен", x: 2, y: 0 },
+        { text: "Скорее согласен", x: 1, y: 0 },
+        { text: "Скорее не согласен", x: -1, y: 0 },
+        { text: "Совершенно не согласен", x: -2, y: 0 }
+      ]
+    },
+    {
+      text: "Государство должно защищать местных производителей, вводя высокие пошлины на импортные товары.",
+      options: [
+        { text: "Полностью согласен", x: -2, y: 0 },
+        { text: "Скорее согласен", x: -1, y: 0 },
+        { text: "Скорее не согласен", x: 1, y: 0 },
+        { text: "Совершенно не согласен", x: 2, y: 0 }
+      ]
+    },
+    {
+      text: "Минимальный размер оплаты труда должен свободно определяться рынком, а не законами государства.",
+      options: [
+        { text: "Полностью согласен", x: 2, y: 0 },
+        { text: "Скорее согласен", x: 1, y: 0 },
+        { text: "Скорее не согласен", x: -1, y: 0 },
+        { text: "Совершенно не согласен", x: -2, y: 0 }
+      ]
+    },
+
+    // --- ЛИЧНЫЕ ПРАВА (Y) ---
+    {
+      text: "Свобода слова должна быть абсолютной, включая право публично критиковать любые традиции и институты.",
+      options: [
+        { text: "Полностью согласен", x: 0, y: 2 },
+        { text: "Скорее согласен", x: 0, y: 1 },
+        { text: "Скорее не согласен", x: 0, y: -1 },
+        { text: "Совершенно не согласен", x: 0, y: -2 }
+      ]
+    },
+    {
+      text: "Государство имеет право цензурировать интернет и СМИ ради сохранения порядка и морали.",
       options: [
         { text: "Полностью согласен", x: 0, y: -2 },
         { text: "Скорее согласен", x: 0, y: -1 },
         { text: "Скорее не согласен", x: 0, y: 1 },
         { text: "Совершенно не согласен", x: 0, y: 2 }
+      ]
+    },
+    {
+      text: "Сохранение традиционных и культурных ценностей должно быть приоритетом государственной политики.",
+      options: [
+        { text: "Полностью согласен", x: 0, y: -2 },
+        { text: "Скорее согласен", x: 0, y: -1 },
+        { text: "Скорее не согласен", x: 0, y: 1 },
+        { text: "Совершенно не согласен", x: 0, y: 2 }
+      ]
+    },
+    {
+      text: "Взрослые люди вправе самостоятельно выбирать любой образ жизни, если он не причиняет прямого вреда другим.",
+      options: [
+        { text: "Полностью согласен", x: 0, y: 2 },
+        { text: "Скорее согласен", x: 0, y: 1 },
+        { text: "Скорее не согласен", x: 0, y: -1 },
+        { text: "Совершенно не согласен", x: 0, y: -2 }
+      ]
+    },
+    {
+      text: "Спецслужбы должны иметь право отслеживать переписки граждан без суда ради национальной безопасности.",
+      options: [
+        { text: "Полностью согласен", x: 0, y: -2 },
+        { text: "Скорее согласен", x: 0, y: -1 },
+        { text: "Скорее не согласен", x: 0, y: 1 },
+        { text: "Совершенно не согласен", x: 0, y: 2 }
+      ]
+    },
+    {
+      text: "Граждане должны иметь беспрепятственное право свободно выезжать из страны и возвращаться в любой момент.",
+      options: [
+        { text: "Полностью согласен", x: 0, y: 2 },
+        { text: "Скорее согласен", x: 0, y: 1 },
+        { text: "Скорее не согласен", x: 0, y: -1 },
+        { text: "Совершенно не согласен", x: 0, y: -2 }
       ]
     }
   ];
@@ -61,14 +181,22 @@
   let scoreX = 0;
   let scoreY = 0;
 
+  function startQuiz() {
+    document.getElementById('welcome-screen').classList.add('hidden');
+    document.getElementById('quiz-screen').classList.remove('hidden');
+    showQuestion();
+  }
+
   function showQuestion() {
     const q = questions[currentQuestion];
+    document.getElementById('progress').innerText = `Вопрос ${currentQuestion + 1} из ${questions.length}`;
     document.getElementById('question-text').innerText = q.text;
     const optionsDiv = document.getElementById('options');
     optionsDiv.innerHTML = '';
 
     q.options.forEach(opt => {
       const btn = document.createElement('button');
+      btn.className = 'btn-option';
       btn.innerText = opt.text;
       btn.onclick = () => {
         scoreX += opt.x;
@@ -85,41 +213,58 @@
   }
 
   function showResult() {
+    scoreX = Math.max(-10, Math.min(10, scoreX));
+    scoreY = Math.max(-10, Math.min(10, scoreY));
+
     document.getElementById('quiz-screen').classList.add('hidden');
     document.getElementById('result-screen').classList.remove('hidden');
-    document.getElementById('coords-text').innerText = `Координаты: X = ${scoreX}, Y = ${scoreY}`;
+    document.getElementById('coords-text').innerText = `Координаты: Экономика (X) = ${scoreX}, Личность (Y) = ${scoreY}`;
 
-    // Отрисовка компаса
+    let title = "";
+    if (scoreX >= 0 && scoreY >= 0) title = "Полный свободолюб";
+    else if (scoreX < 0 && scoreY >= 0) title = "Социал-либерал";
+    else if (scoreX >= 0 && scoreY < 0) title = "Рыночный консерватор";
+    else title = "Консервативный социалист";
+
+    document.getElementById('ideology-title').innerText = title;
+
     const canvas = document.getElementById('compassCanvas');
     const ctx = canvas.getContext('2d');
     const w = canvas.width;
     const h = canvas.height;
 
-    // Квадранты (Красный, Синий, Зеленый, Желтый)
-    ctx.fillStyle = '#f87171'; ctx.fillRect(0, 0, w/2, h/2);
-    ctx.fillStyle = '#60a5fa'; ctx.fillRect(w/2, 0, w/2, h/2);
-    ctx.fillStyle = '#4ade80'; ctx.fillRect(0, h/2, w/2, h/2);
-    ctx.fillStyle = '#facc15'; ctx.fillRect(w/2, h/2, w/2, h/2);
+    // Сетка квадрантов
+    ctx.fillStyle = '#fee2e2'; ctx.fillRect(0, 0, w/2, h/2);       
+    ctx.fillStyle = '#dbeafe'; ctx.fillRect(w/2, 0, w/2, h/2);     
+    ctx.fillStyle = '#fef3c7'; ctx.fillRect(0, h/2, w/2, h/2);     
+    ctx.fillStyle = '#dcfce7'; ctx.fillRect(w/2, h/2, w/2, h/2);   
 
     // Оси
-    ctx.strokeStyle = '#333';
+    ctx.strokeStyle = '#475569';
     ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(w/2, 0); ctx.lineTo(w/2, h); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(0, h/2); ctx.lineTo(w, h/2); ctx.stroke();
 
+    // Подписи
+    ctx.fillStyle = '#0f172a';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('ЛИЧНАЯ СВОБОДА (+10)', w/2 - 60, 15);
+    ctx.fillText('ГОСКОНТРОЛЬ (-10)', w/2 - 50, h - 8);
+    ctx.fillText('ГОСЭКОНОМИКА (-10)', 5, h/2 - 6);
+    ctx.fillText('СВОБОДНЫЙ РЫНОК (+10)', w - 130, h/2 - 6);
+
     // Точка пользователя
-    // Нормализация координат от -5..5 к пикселям
-    const maxScore = 5; 
-    const pointX = (w / 2) + (scoreX / maxScore) * (w / 2);
-    const pointY = (h / 2) - (scoreY / maxScore) * (h / 2); // Минус т.к. Y в canvas идет сверху вниз
+    const pointX = (w / 2) + (scoreX / 10) * (w / 2);
+    const pointY = (h / 2) - (scoreY / 10) * (h / 2);
 
-    ctx.fillStyle = 'black';
+    ctx.fillStyle = '#ef4444';
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.arc(pointX, pointY, 7, 0, Math.PI * 2);
+    ctx.arc(pointX, pointY, 8, 0, Math.PI * 2);
     ctx.fill();
+    ctx.stroke();
   }
-
-  showQuestion();
 </script>
 
 </body>
