@@ -356,12 +356,24 @@
       { text: "Свободное перемещение товаров и капитала через границы полезнее для страны, чем защита местного рынка.", axis: 'X', multiplier: 1, weight: 1.1, chapter: "Глава 5: Общество и порядок" }
     ];
 
+    const STORAGE_KEY = 'political_compass_quiz_state';
     let currentQuestionIndex = 0;
     let userAnswers = [];
+
+    function saveState(screen) {
+      const state = {
+        screen: screen,
+        currentQuestionIndex: currentQuestionIndex,
+        userAnswers: userAnswers
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
 
     function startQuiz() {
       document.getElementById('intro-ui').style.display = 'none';
       document.getElementById('quiz-ui').style.display = 'block';
+      document.getElementById('results-ui').style.display = 'none';
+      saveState('quiz');
       renderQuestion();
     }
 
@@ -369,6 +381,7 @@
       if (currentQuestionIndex > 0) {
         currentQuestionIndex--;
         userAnswers.pop();
+        saveState('quiz');
         renderQuestion();
       }
     }
@@ -376,7 +389,9 @@
     function restartQuiz() {
       currentQuestionIndex = 0;
       userAnswers = [];
+      localStorage.removeItem(STORAGE_KEY);
       document.getElementById('results-ui').style.display = 'none';
+      document.getElementById('quiz-ui').style.display = 'none';
       document.getElementById('intro-ui').style.display = 'block';
     }
 
@@ -385,6 +400,7 @@
       currentQuestionIndex++;
 
       if (currentQuestionIndex < questions.length) {
+        saveState('quiz');
         renderQuestion();
       } else {
         calculateAndShowResults();
@@ -465,6 +481,7 @@
 
       const ideology = getScientificIdeology(x, y);
 
+      document.getElementById('intro-ui').style.display = 'none';
       document.getElementById('quiz-ui').style.display = 'none';
       document.getElementById('results-ui').style.display = 'block';
 
@@ -474,6 +491,7 @@
       const formatSignY = y > 0 ? '+' : '';
       document.getElementById('coordinates-text').innerText = `X: ${formatSignX}${x.toFixed(1)}, Y: ${formatSignY}${y.toFixed(1)}`;
 
+      saveState('results');
       drawCompass(x, y);
     }
 
@@ -545,6 +563,30 @@
       ctx.strokeStyle = '#ffffff';
       ctx.stroke();
     }
+
+    function loadSavedState() {
+      const savedData = localStorage.getItem(STORAGE_KEY);
+      if (!savedData) return;
+
+      try {
+        const parsed = JSON.parse(savedData);
+        if (parsed.screen === 'quiz' && Array.isArray(parsed.userAnswers)) {
+          currentQuestionIndex = parsed.currentQuestionIndex || 0;
+          userAnswers = parsed.userAnswers;
+          document.getElementById('intro-ui').style.display = 'none';
+          document.getElementById('quiz-ui').style.display = 'block';
+          renderQuestion();
+        } else if (parsed.screen === 'results' && Array.isArray(parsed.userAnswers)) {
+          userAnswers = parsed.userAnswers;
+          calculateAndShowResults();
+        }
+      } catch (e) {
+        console.error("Ошибка при восстановлении состояния:", e);
+      }
+    }
+
+    // Загрузка сохранённого состояния при старте
+    window.addEventListener('DOMContentLoaded', loadSavedState);
   </script>
 </body>
 </html>
