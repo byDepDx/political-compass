@@ -268,7 +268,7 @@
         Тест состоит из <strong>40 вопросов</strong>, разделенных на 5 тематических глав.
       </p>
 
-      <button class="primary-btn" onclick="startQuiz()">Начать тест</button>
+      <button type="button" class="primary-btn" id="start-btn">Начать тест</button>
     </div>
 
     <!-- 2. ИНТЕРФЕЙС ТЕСТА -->
@@ -284,14 +284,14 @@
       <div id="question-text" class="question-text">Загрузка вопроса...</div>
 
       <div class="options-grid">
-        <button class="option-btn" onclick="selectOption(2)">Полностью согласен</button>
-        <button class="option-btn" onclick="selectOption(1)">Скорее согласен</button>
-        <button class="option-btn" onclick="selectOption(-1)">Скорее не согласен</button>
-        <button class="option-btn" onclick="selectOption(-2)">Совершенно не согласен</button>
+        <button type="button" class="option-btn" data-value="2">Полностью согласен</button>
+        <button type="button" class="option-btn" data-value="1">Скорее согласен</button>
+        <button type="button" class="option-btn" data-value="-1">Скорее не согласен</button>
+        <button type="button" class="option-btn" data-value="-2">Совершенно не согласен</button>
       </div>
 
       <div class="nav-controls">
-        <button id="btn-back" class="btn-secondary" onclick="prevQuestion()" disabled>
+        <button type="button" id="btn-back" class="btn-secondary" disabled>
           ← Назад
         </button>
       </div>
@@ -307,240 +307,229 @@
         <canvas id="compassCanvas" width="360" height="360"></canvas>
       </div>
 
-      <button class="primary-btn" onclick="restartQuiz()">Пройти заново</button>
+      <button type="button" class="primary-btn" id="restart-btn">Пройти заново</button>
     </div>
 
   </div>
 
   <script>
-    const questions = [
-      // Глава 1: Внешняя политика
-      { text: "Государственные интересы и суверенитет всегда важнее международных прав человека.", axis: 'Y', multiplier: -1, chapter: "Глава 1: Внешняя политика" },
-      { text: "Граждане должны безусловно поддерживать свою страну в любых внешнеполитических конфликтах.", axis: 'Y', multiplier: -1, chapter: "Глава 1: Внешняя политика" },
-      { text: "Патриотическое воспитание в школах должно быть обязательным с раннего детства.", axis: 'Y', multiplier: -1, chapter: "Глава 1: Внешняя политика" },
-      { text: "Импортные товары, иностранные языки и чужие культурные веяния вредят идентичности нации.", axis: 'Y', multiplier: -1, chapter: "Глава 1: Внешняя политика" },
-      { text: "Любая критическая публикация о действиях своей армии должна быть запрещена.", axis: 'Y', multiplier: -1, chapter: "Глава 1: Внешняя политика" },
+    (function () {
+      const questions = [
+        // Глава 1: Внешняя политика
+        { text: "Государственные интересы и суверенитет всегда важнее международных прав человека.", axis: 'Y', multiplier: -1, chapter: "Глава 1: Внешняя политика" },
+        { text: "Граждане должны безусловно поддерживать свою страну в любых внешнеполитических конфликтах.", axis: 'Y', multiplier: -1, chapter: "Глава 1: Внешняя политика" },
+        { text: "Патриотическое воспитание в школах должно быть обязательным с раннего детства.", axis: 'Y', multiplier: -1, chapter: "Глава 1: Внешняя политика" },
+        { text: "Импортные товары, иностранные языки и чужие культурные веяния вредят идентичности нации.", axis: 'Y', multiplier: -1, chapter: "Глава 1: Внешняя политика" },
+        { text: "Любая критическая публикация о действиях своей армии должна быть запрещена.", axis: 'Y', multiplier: -1, chapter: "Глава 1: Внешняя политика" },
 
-      // Глава 2: Экономика
-      { text: "Крупная промышленность, недра и энергетика должны полностью принадлежать государству.", axis: 'X', multiplier: -1, chapter: "Глава 2: Экономика" },
-      { text: "Высокие налоги для богатых людей — единственный путь к справедливому обществу.", axis: 'X', multiplier: -1, chapter: "Глава 2: Экономика" },
-      { text: "Государство не должно вмешиваться в ценообразование, даже на продукты первой необходимости.", axis: 'X', multiplier: 1, chapter: "Глава 2: Экономика" },
-      { text: "Бесплатное здравоохранение и образование — это обязанность государства, а не услуга.", axis: 'X', multiplier: -1, chapter: "Глава 2: Экономика" },
-      { text: "Профсоюзы и законы о труде только мешают развитию бизнеса и росту зарплат.", axis: 'X', multiplier: 1, chapter: "Глава 2: Экономика" },
-      { text: "Каждый человек должен сам копить на свою пенсию, без участия государственного пенсионного фонда.", axis: 'X', multiplier: 1, chapter: "Глава 2: Экономика" },
-      { text: "Государство должно выплачивать Базовый Безусловный Доход каждому гражданину.", axis: 'X', multiplier: -1, chapter: "Глава 2: Экономика" },
-      { text: "Поддержка убыточных предприятий за счет бюджета — это ошибка, слабый бизнес должен закрываться.", axis: 'X', multiplier: 1, chapter: "Глава 2: Экономика" },
-      { text: "Прогрессивная шкала налогообложения справедливее, чем плоская.", axis: 'X', multiplier: -1, chapter: "Глава 2: Экономика" },
-      { text: "Частная собственность на землю и ресурсы должна быть абсолютно неприкосновенной.", axis: 'X', multiplier: 1, chapter: "Глава 2: Экономика" },
+        // Глава 2: Экономика
+        { text: "Крупная промышленность, недра и энергетика должны полностью принадлежать государству.", axis: 'X', multiplier: -1, chapter: "Глава 2: Экономика" },
+        { text: "Высокие налоги для богатых людей — единственный путь к справедливому обществу.", axis: 'X', multiplier: -1, chapter: "Глава 2: Экономика" },
+        { text: "Государство не должно вмешиваться в ценообразование, даже на продукты первой необходимости.", axis: 'X', multiplier: 1, chapter: "Глава 2: Экономика" },
+        { text: "Бесплатное здравоохранение и образование — это обязанность государства, а не услуга.", axis: 'X', multiplier: -1, chapter: "Глава 2: Экономика" },
+        { text: "Профсоюзы и законы о труде только мешают развитию бизнеса и росту зарплат.", axis: 'X', multiplier: 1, chapter: "Глава 2: Экономика" },
+        { text: "Каждый человек должен сам копить на свою пенсию, без участия государственного пенсионного фонда.", axis: 'X', multiplier: 1, chapter: "Глава 2: Экономика" },
+        { text: "Государство должно выплачивать Базовый Безусловный Доход каждому гражданину.", axis: 'X', multiplier: -1, chapter: "Глава 2: Экономика" },
+        { text: "Поддержка убыточных предприятий за счет бюджета — это ошибка, слабый бизнес должен закрываться.", axis: 'X', multiplier: 1, chapter: "Глава 2: Экономика" },
+        { text: "Прогрессивная шкала налогообложения справедливее, чем плоская.", axis: 'X', multiplier: -1, chapter: "Глава 2: Экономика" },
+        { text: "Частная собственность на землю и ресурсы должна быть абсолютно неприкосновенной.", axis: 'X', multiplier: 1, chapter: "Глава 2: Экономика" },
 
-      // Глава 3: Личные социальные ценности
-      { text: "Традиционная семья — это единственная правильная основа общества.", axis: 'Y', multiplier: -1, chapter: "Глава 3: Социальные ценности" },
-      { text: "Религия и вера должны играть активную роль в государственном управлении и образовании.", axis: 'Y', multiplier: -1, chapter: "Глава 3: Социальные ценности" },
-      { text: "Взрослые люди имеют право употреблять любые вещества или алкоголь, пока это не вредит другим.", axis: 'Y', multiplier: 1, chapter: "Глава 3: Социальные ценности" },
-      { text: "Эвтаназия должна быть легализована.", axis: 'Y', multiplier: 1, chapter: "Глава 3: Социальные ценности" },
-      { text: "Государство имеет право требовать от граждан отработки или обязательной службы.", axis: 'Y', multiplier: -1, chapter: "Глава 3: Социальные ценности" },
-      { text: "Право на ношение оружия для самообороны должно быть доступно каждому дееспособному гражданину.", axis: 'Y', multiplier: 1, chapter: "Глава 3: Социальные ценности" },
-      { text: "Свобода слова должна защищать даже те высказывания, которые кажутся большинству оскорбительными.", axis: 'Y', multiplier: 1, chapter: "Глава 3: Социальные ценности" },
-      { text: "Аборты должны быть запрещены или строго ограничены законом.", axis: 'Y', multiplier: -1, chapter: "Глава 3: Социальные ценности" },
-      { text: "Цензура в искусстве, кино и литературе необходима для защиты морали.", axis: 'Y', multiplier: -1, chapter: "Глава 3: Социальные ценности" },
-      { text: "Граждане должны иметь право без ограничений выбирать место жительства и выезжать из страны.", axis: 'Y', multiplier: 1, chapter: "Глава 3: Социальные ценности" },
+        // Глава 3: Личные социальные ценности
+        { text: "Традиционная семья — это единственная правильная основа общества.", axis: 'Y', multiplier: -1, chapter: "Глава 3: Социальные ценности" },
+        { text: "Религия и вера должны играть активную роль в государственном управлении и образовании.", axis: 'Y', multiplier: -1, chapter: "Глава 3: Социальные ценности" },
+        { text: "Взрослые люди имеют право употреблять любые вещества или алкоголь, пока это не вредит другим.", axis: 'Y', multiplier: 1, chapter: "Глава 3: Социальные ценности" },
+        { text: "Эвтаназия должна быть легализована.", axis: 'Y', multiplier: 1, chapter: "Глава 3: Социальные ценности" },
+        { text: "Государство имеет право требовать от граждан отработки или обязательной службы.", axis: 'Y', multiplier: -1, chapter: "Глава 3: Социальные ценности" },
+        { text: "Право на ношение оружия для самообороны должно быть доступно каждому дееспособному гражданину.", axis: 'Y', multiplier: 1, chapter: "Глава 3: Социальные ценности" },
+        { text: "Свобода слова должна защищать даже те высказывания, которые кажутся большинству оскорбительными.", axis: 'Y', multiplier: 1, chapter: "Глава 3: Социальные ценности" },
+        { text: "Аборты должны быть запрещены или строго ограничены законом.", axis: 'Y', multiplier: -1, chapter: "Глава 3: Социальные ценности" },
+        { text: "Цензура в искусстве, кино и литературе необходима для защиты морали.", axis: 'Y', multiplier: -1, chapter: "Глава 3: Социальные ценности" },
+        { text: "Граждане должны иметь право без ограничений выбирать место жительства и выезжать из страны.", axis: 'Y', multiplier: 1, chapter: "Глава 3: Социальные ценности" },
 
-      // Глава 4: Общество
-      { text: "Иерархия и неравенство в обществе естественны — сильные и талантливые всегда должны быть вверху.", axis: 'X', multiplier: 1, chapter: "Глава 4: Общество" },
-      { text: "Соблюдение порядка и стабильности в обществе важнее, чем отдельные права человека.", axis: 'Y', multiplier: -1, chapter: "Глава 4: Общество" },
-      { text: "Прогресс человечества важнее сохранения национальных и религиозных традиций.", axis: 'Y', multiplier: 1, chapter: "Глава 4: Общество" },
-      { text: "Технологии и автоматизация должны контролироваться государством.", axis: 'X', multiplier: -1, chapter: "Глава 4: Общество" },
-      { text: "Преступников нужно жестко наказывать и изолировать, а не пытаться перевоспитать.", axis: 'Y', multiplier: -1, chapter: "Глава 4: Общество" },
-      { text: "Социальная помощь развращает людей и делает их ленивыми.", axis: 'X', multiplier: 1, chapter: "Глава 4: Общество" },
-      { text: "Безопасность на улицах и тотальное видеонаблюдение важнее приватности граждан.", axis: 'Y', multiplier: -1, chapter: "Глава 4: Общество" },
-      { text: "Конкуренция — главный двигатель развития человечества во всех сферах.", axis: 'X', multiplier: 1, chapter: "Глава 4: Общество" },
-      { text: "Государство должно жестко бороться с экологическими загрязнениями, даже если это вредит экономическому росту.", axis: 'X', multiplier: -1, chapter: "Глава 4: Общество" },
-      { text: "Управление государством нужно доверить профессиональным экспертам и ученым, а не голосовать на референдумах.", axis: 'Y', multiplier: -1, chapter: "Глава 4: Общество" },
+        // Глава 4: Общество
+        { text: "Иерархия и неравенство в обществе естественны — сильные и талантливые всегда должны быть вверху.", axis: 'X', multiplier: 1, chapter: "Глава 4: Общество" },
+        { text: "Соблюдение порядка и стабильности в обществе важнее, чем отдельные права человека.", axis: 'Y', multiplier: -1, chapter: "Глава 4: Общество" },
+        { text: "Прогресс человечества важнее сохранения национальных и религиозных традиций.", axis: 'Y', multiplier: 1, chapter: "Глава 4: Общество" },
+        { text: "Технологии и автоматизация должны контролироваться государством.", axis: 'X', multiplier: -1, chapter: "Глава 4: Общество" },
+        { text: "Преступников нужно жестко наказывать и изолировать, а не пытаться перевоспитать.", axis: 'Y', multiplier: -1, chapter: "Глава 4: Общество" },
+        { text: "Социальная помощь развращает людей и делает их ленивыми.", axis: 'X', multiplier: 1, chapter: "Глава 4: Общество" },
+        { text: "Безопасность на улицах и тотальное видеонаблюдение важнее приватности граждан.", axis: 'Y', multiplier: -1, chapter: "Глава 4: Общество" },
+        { text: "Конкуренция — главный двигатель развития человечества во всех сферах.", axis: 'X', multiplier: 1, chapter: "Глава 4: Общество" },
+        { text: "Государство должно жестко бороться с экологическими загрязнениями, даже если это вредит экономическому росту.", axis: 'X', multiplier: -1, chapter: "Глава 4: Общество" },
+        { text: "Управление государством нужно доверить профессиональным экспертам и ученым, а не голосовать на референдумах.", axis: 'Y', multiplier: -1, chapter: "Глава 4: Общество" },
 
-      // Глава 5: Личная жизнь
-      { text: "Интимная жизнь граждан — это их личное дело, государство вообще не должно туда лезть.", axis: 'Y', multiplier: 1, chapter: "Глава 5: Личная жизнь" },
-      { text: "Порнография и взрослый контент должны быть полностью запрещены законом.", axis: 'Y', multiplier: -1, chapter: "Глава 5: Личная жизнь" },
-      { text: "Сексуальное просвещение в школах необходимо для здоровья и безопасности подростков.", axis: 'Y', multiplier: 1, chapter: "Глава 5: Личная жизнь" },
-      { text: "Добровольный секс за деньги должен быть легализован и облагаться налогом.", axis: 'Y', multiplier: 1, chapter: "Глава 5: Личная жизнь" },
-      { text: "Публичная демонстрация и продвижение нетрадиционных сексуальных отношений недопустимы.", axis: 'Y', multiplier: -1, chapter: "Глава 5: Личная жизнь" }
-    ];
+        // Глава 5: Личная жизнь
+        { text: "Интимная жизнь граждан — это их личное дело, государство вообще не должно туда лезть.", axis: 'Y', multiplier: 1, chapter: "Глава 5: Личная жизнь" },
+        { text: "Порнография и взрослый контент должны быть полностью запрещены законом.", axis: 'Y', multiplier: -1, chapter: "Глава 5: Личная жизнь" },
+        { text: "Сексуальное просвещение в школах необходимо для здоровья и безопасности подростков.", axis: 'Y', multiplier: 1, chapter: "Глава 5: Личная жизнь" },
+        { text: "Добровольный секс за деньги должен быть легализован и облагаться налогом.", axis: 'Y', multiplier: 1, chapter: "Глава 5: Личная жизнь" },
+        { text: "Публичная демонстрация и продвижение нетрадиционных сексуальных отношений недопустимы.", axis: 'Y', multiplier: -1, chapter: "Глава 5: Личная жизнь" }
+      ];
 
-    let currentQuestionIndex = 0;
-    let userAnswers = [];
+      let currentQuestionIndex = 0;
+      let userAnswers = [];
 
-    function startQuiz() {
-      document.getElementById('intro-ui').style.display = 'none';
-      document.getElementById('quiz-ui').style.display = 'block';
-      renderQuestion();
-    }
+      function init() {
+        const startBtn = document.getElementById('start-btn');
+        const backBtn = document.getElementById('btn-back');
+        const restartBtn = document.getElementById('restart-btn');
+        const optionBtns = document.querySelectorAll('.option-btn');
 
-    function prevQuestion() {
-      if (currentQuestionIndex > 0) {
-        currentQuestionIndex--;
-        userAnswers.pop();
-        renderQuestion();
-      }
-    }
-
-    function restartQuiz() {
-      currentQuestionIndex = 0;
-      userAnswers = [];
-      document.getElementById('results-ui').style.display = 'none';
-      document.getElementById('intro-ui').style.display = 'block';
-    }
-
-    function selectOption(score) {
-      userAnswers.push(score);
-      currentQuestionIndex++;
-
-      if (currentQuestionIndex < questions.length) {
-        renderQuestion();
-      } else {
-        calculateAndShowResults();
-      }
-    }
-
-    function renderQuestion() {
-      const q = questions[currentQuestionIndex];
-      document.getElementById('question-text').innerText = q.text;
-      document.getElementById('chapter-label').innerText = q.chapter;
-
-      const currentNum = currentQuestionIndex + 1;
-      const totalNum = questions.length;
-      document.getElementById('progress-text').innerText = `${currentNum} / ${totalNum}`;
-      document.getElementById('progress-bar').style.width = `${(currentNum / totalNum) * 100}%`;
-
-      document.getElementById('btn-back').disabled = (currentQuestionIndex === 0);
-    }
-
-    function getScientificIdeology(x, y) {
-      const dist = Math.sqrt(x * x + y * y);
-      if (dist <= 2) return "Центризм / Прагматизм";
-
-      if (x >= 0 && y >= 0) {
-        if (x >= 6 && y >= 6) return "Анархо-капитализм / Либертарианство";
-        if (x >= 4) return "Классический либерализм";
-        return "Неолиберализм";
-      }
-
-      if (x < 0 && y >= 0) {
-        if (x <= -6 && y >= 6) return "Анархо-коммунизм / Левый анархизм";
-        if (x <= -4) return "Демократический социализм";
-        return "Социал-демократия";
-      }
-
-      if (x >= 0 && y < 0) {
-        if (x >= 6 && y <= -6) return "Правый авторитаризм";
-        if (y <= -5) return "Авторитарный капитализм";
-        return "Консерватизм";
-      }
-
-      if (x < 0 && y < 0) {
-        if (x <= -8 || y <= -8) return "Тоталитарный коллективизм";
-        if (x >= -4 && y >= -4) return "Авторитарный социализм";
-        return "Государственный этатизм";
-      }
-
-      return "Неопределенная позиция";
-    }
-
-    function drawCompass(x, y) {
-      const canvas = document.getElementById('compassCanvas');
-      const ctx = canvas.getContext('2d');
-      const w = canvas.width;
-      const h = canvas.height;
-
-      const pad = 65;
-      const plotW = w - pad * 2;
-      const plotH = h - pad * 2;
-      const centerX = pad + plotW / 2;
-      const centerY = pad + plotH / 2;
-
-      ctx.clearRect(0, 0, w, h);
-
-      // 1. Отрисовка квадрантов
-      ctx.fillStyle = 'rgba(239, 68, 68, 0.18)';
-      ctx.fillRect(pad, pad, plotW / 2, plotH / 2);
-
-      ctx.fillStyle = 'rgba(34, 197, 94, 0.18)';
-      ctx.fillRect(centerX, pad, plotW / 2, plotH / 2);
-
-      ctx.fillStyle = 'rgba(168, 85, 247, 0.18)';
-      ctx.fillRect(pad, centerY, plotW / 2, plotH / 2);
-
-      ctx.fillStyle = 'rgba(234, 179, 8, 0.18)';
-      ctx.fillRect(centerX, centerY, plotW / 2, plotH / 2);
-
-      // 2. Рамка и оси
-      ctx.strokeStyle = '#cbd5e1';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(pad, pad, plotW, plotH);
-
-      ctx.beginPath();
-      ctx.moveTo(centerX, pad);
-      ctx.lineTo(centerX, pad + plotH);
-      ctx.moveTo(pad, centerY);
-      ctx.lineTo(pad + plotH, centerY);
-      ctx.strokeStyle = '#64748b';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-
-      // 3. Подписи осей
-      ctx.fillStyle = '#64748b';
-      ctx.font = 'bold 10px sans-serif';
-      ctx.textAlign = 'center';
-
-      // Верх и низ
-      ctx.fillText('СВОБОДА ЛИЧНОСТИ (+10)', centerX, pad - 12);
-      ctx.fillText('ГОСКОНТРОЛЬ (-10)', centerX, pad + plotH + 22);
-
-      // Левый край
-      ctx.fillText('ГОСПЛАН', pad / 2, centerY - 6);
-      ctx.fillText('(-10)', pad / 2, centerY + 10);
-
-      // Правый край
-      ctx.fillText('РЫНОК', w - pad / 2, centerY - 6);
-      ctx.fillText('(+10)', w - pad / 2, centerY + 10);
-
-      // 4. Точка результата
-      const pointX = centerX + (x / 10) * (plotW / 2);
-      const pointY = centerY - (y / 10) * (plotH / 2);
-
-      ctx.beginPath();
-      ctx.arc(pointX, pointY, 12, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(37, 99, 235, 0.35)';
-      ctx.fill();
-
-      ctx.beginPath();
-      ctx.arc(pointX, pointY, 7, 0, Math.PI * 2);
-      ctx.fillStyle = '#2563eb';
-      ctx.fill();
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = '#ffffff';
-      ctx.stroke();
-    }
-
-    function calculateAndShowResults() {
-      let rawX = 0, maxX = 0;
-      let rawY = 0, maxY = 0;
-
-      questions.forEach((q, index) => {
-        const answer = userAnswers[index];
-        if (q.axis === 'X') {
-          rawX += answer * q.multiplier;
-          maxX += 2;
-        } else if (q.axis === 'Y') {
-          rawY += answer * q.multiplier;
-          maxY += 2;
+        if (startBtn) {
+          startBtn.addEventListener('click', startQuiz);
         }
-      });
 
-      const finalX = Math.round((rawX / maxX) * 10);
-      const finalY = Math.round((rawY / maxY) * 10);
+        if (backBtn) {
+          backBtn.addEventListener('click', prevQuestion);
+        }
 
-      const ideology = getScientificIdeology(finalX, finalY);
+        if (restartBtn) {
+          restartBtn.addEventListener('click', restartQuiz);
+        }
 
-      document.getElementById('quiz-ui').style.display = 'none';
-      document.getElementById('results-ui').style.display = 'block';
-      document.getElementById('ideology-title').innerText = ideology;
-      docum
+        optionBtns.forEach(btn => {
+          btn.addEventListener('click', function () {
+            const val = parseInt(this.getAttribute('data-value'), 10);
+            selectOption(val);
+          });
+        });
+      }
+
+      function startQuiz() {
+        document.getElementById('intro-ui').style.display = 'none';
+        document.getElementById('quiz-ui').style.display = 'block';
+        renderQuestion();
+      }
+
+      function prevQuestion() {
+        if (currentQuestionIndex > 0) {
+          currentQuestionIndex--;
+          userAnswers.pop();
+          renderQuestion();
+        }
+      }
+
+      function restartQuiz() {
+        currentQuestionIndex = 0;
+        userAnswers = [];
+        document.getElementById('results-ui').style.display = 'none';
+        document.getElementById('intro-ui').style.display = 'block';
+      }
+
+      function selectOption(score) {
+        userAnswers.push(score);
+        currentQuestionIndex++;
+
+        if (currentQuestionIndex < questions.length) {
+          renderQuestion();
+        } else {
+          calculateAndShowResults();
+        }
+      }
+
+      function renderQuestion() {
+        const q = questions[currentQuestionIndex];
+        document.getElementById('question-text').innerText = q.text;
+        document.getElementById('chapter-label').innerText = q.chapter;
+
+        const currentNum = currentQuestionIndex + 1;
+        const totalNum = questions.length;
+        document.getElementById('progress-text').innerText = `${currentNum} / ${totalNum}`;
+        document.getElementById('progress-bar').style.width = `${(currentNum / totalNum) * 100}%`;
+
+        document.getElementById('btn-back').disabled = (currentQuestionIndex === 0);
+      }
+
+      function getScientificIdeology(x, y) {
+        const dist = Math.sqrt(x * x + y * y);
+        if (dist <= 2) return "Центризм / Прагматизм";
+
+        if (x >= 0 && y >= 0) {
+          if (x >= 6 && y >= 6) return "Анархо-капитализм / Либертарианство";
+          if (x >= 4) return "Классический либерализм";
+          return "Неолиберализм";
+        }
+
+        if (x < 0 && y >= 0) {
+          if (x <= -6 && y >= 6) return "Анархо-коммунизм / Левый анархизм";
+          if (x <= -4) return "Демократический социализм";
+          return "Социал-демократия";
+        }
+
+        if (x >= 0 && y < 0) {
+          if (x >= 6 && y <= -6) return "Правый авторитаризм";
+          if (y <= -5) return "Авторитарный капитализм";
+          return "Консерватизм";
+        }
+
+        if (x < 0 && y < 0) {
+          if (x <= -8 || y <= -8) return "Тоталитарный коллективизм";
+          if (x >= -4 && y >= -4) return "Авторитарный социализм";
+          return "Государственный этатизм";
+        }
+
+        return "Неопределенная позиция";
+      }
+
+      function drawCompass(x, y) {
+        const canvas = document.getElementById('compassCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width;
+        const h = canvas.height;
+
+        const pad = 65;
+        const plotW = w - pad * 2;
+        const plotH = h - pad * 2;
+        const centerX = pad + plotW / 2;
+        const centerY = pad + plotH / 2;
+
+        ctx.clearRect(0, 0, w, h);
+
+        // 1. Отрисовка квадрантов
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.18)';
+        ctx.fillRect(pad, pad, plotW / 2, plotH / 2);
+
+        ctx.fillStyle = 'rgba(34, 197, 94, 0.18)';
+        ctx.fillRect(centerX, pad, plotW / 2, plotH / 2);
+
+        ctx.fillStyle = 'rgba(168, 85, 247, 0.18)';
+        ctx.fillRect(pad, centerY, plotW / 2, plotH / 2);
+
+        ctx.fillStyle = 'rgba(234, 179, 8, 0.18)';
+        ctx.fillRect(centerX, centerY, plotW / 2, plotH / 2);
+
+        // 2. Рамка и оси
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(pad, pad, plotW, plotH);
+
+        ctx.beginPath();
+        ctx.moveTo(centerX, pad);
+        ctx.lineTo(centerX, pad + plotH);
+        ctx.moveTo(pad, centerY);
+        ctx.lineTo(pad + plotH, centerY);
+        ctx.strokeStyle = '#64748b';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // 3. Подписи осей
+        ctx.fillStyle = '#64748b';
+        ctx.font = 'bold 10px sans-serif';
+        ctx.textAlign = 'center';
+
+        ctx.fillText('СВОБОДА ЛИЧНОСТИ (+10)', centerX, pad - 12);
+        ctx.fillText('ГОСКОНТРОЛЬ (-10)', centerX, pad + plotH + 22);
+
+        ctx.fillText('ГОСПЛАН', pad / 2, centerY - 6);
+        ctx.fillText('(-10)', pad / 2, centerY + 10);
+
+        ctx.fillText('РЫНОК', w - pad / 2, centerY - 6);
+        ctx.fillText('(+10)', w - pad / 2, centerY + 10);
+
+        // 4. Точка результата
+        const pointX = centerX + (x / 10) * (plotW / 2);
+        const pointY = centerY - (y / 10) * (plotH / 2);
+
+        ctx.beginPath();
+ 
