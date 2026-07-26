@@ -471,6 +471,38 @@
         return "Неопределенная позиция";
       }
 
+      function calculateAndShowResults() {
+        let rawX = 0;
+        let rawY = 0;
+        let countX = 0;
+        let countY = 0;
+
+        questions.forEach((q, index) => {
+          const ans = userAnswers[index];
+          const score = ans * q.multiplier;
+          if (q.axis === 'X') {
+            rawX += score;
+            countX += 2;
+          } else {
+            rawY += score;
+            countY += 2;
+          }
+        });
+
+        const x = countX > 0 ? (rawX / countX) * 10 : 0;
+        const y = countY > 0 ? (rawY / countY) * 10 : 0;
+
+        const ideology = getScientificIdeology(x, y);
+
+        document.getElementById('quiz-ui').style.display = 'none';
+        document.getElementById('results-ui').style.display = 'block';
+
+        document.getElementById('ideology-title').innerText = ideology;
+        document.getElementById('coordinates-text').innerText = `X: ${x.toFixed(1)}, Y: ${y.toFixed(1)}`;
+
+        drawCompass(x, y);
+      }
+
       function drawCompass(x, y) {
         const canvas = document.getElementById('compassCanvas');
         if (!canvas) return;
@@ -502,34 +534,4 @@
         // 2. Рамка и оси
         ctx.strokeStyle = '#cbd5e1';
         ctx.lineWidth = 2;
-        ctx.strokeRect(pad, pad, plotW, plotH);
-
-        ctx.beginPath();
-        ctx.moveTo(centerX, pad);
-        ctx.lineTo(centerX, pad + plotH);
-        ctx.moveTo(pad, centerY);
-        ctx.lineTo(pad + plotH, centerY);
-        ctx.strokeStyle = '#64748b';
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-
-        // 3. Подписи осей
-        ctx.fillStyle = '#64748b';
-        ctx.font = 'bold 10px sans-serif';
-        ctx.textAlign = 'center';
-
-        ctx.fillText('СВОБОДА ЛИЧНОСТИ (+10)', centerX, pad - 12);
-        ctx.fillText('ГОСКОНТРОЛЬ (-10)', centerX, pad + plotH + 22);
-
-        ctx.fillText('ГОСПЛАН', pad / 2, centerY - 6);
-        ctx.fillText('(-10)', pad / 2, centerY + 10);
-
-        ctx.fillText('РЫНОК', w - pad / 2, centerY - 6);
-        ctx.fillText('(+10)', w - pad / 2, centerY + 10);
-
-        // 4. Точка результата
-        const pointX = centerX + (x / 10) * (plotW / 2);
-        const pointY = centerY - (y / 10) * (plotH / 2);
-
-        ctx.beginPath();
- 
+        ctx.strokeRect(
