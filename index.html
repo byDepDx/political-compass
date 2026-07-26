@@ -74,7 +74,7 @@
       margin-bottom: 24px;
     }
 
-    /* 2. ПРОГРЕСС-БАР */
+    /* 2. ПРОГРЕСС-БАР И ВОПРОСЫ */
     .progress-header {
       display: flex;
       justify-content: space-between;
@@ -101,7 +101,6 @@
       transition: width 0.3s ease;
     }
 
-    /* 3. ВОПРОСЫ И ГЛАВЫ */
     .chapter-title {
       font-size: 13px;
       text-transform: uppercase;
@@ -148,7 +147,7 @@
       color: var(--primary-color);
     }
 
-    /* КНОПКА НАЗАД */
+    /* НАВИГАЦИЯ */
     .nav-controls {
       display: flex;
       justify-content: flex-start;
@@ -184,7 +183,6 @@
       border-color: var(--border-color);
     }
 
-    /* ОСНОВНАЯ КНОПКА */
     .primary-btn {
       width: 100%;
       background-color: var(--primary-color);
@@ -203,10 +201,9 @@
       background-color: var(--primary-hover);
     }
 
-    /* ЭКРАН РЕЗУЛЬТАТОВ */
+    /* РЕЗУЛЬТАТЫ */
     .results-box {
       text-align: center;
-      display: none;
     }
 
     .results-box h2 {
@@ -250,7 +247,7 @@
 
   <div class="quiz-container">
     
-    <!-- 1. ЭКРАН ПРИВЕТСТВИЯ -->
+    <!-- 1. НАЧАЛЬНЫЙ ЭКРАН С ПРЕДУПРЕЖДЕНИЕМ -->
     <div id="intro-ui">
       <h1 class="intro-title">Политический компас</h1>
       
@@ -268,7 +265,7 @@
         Тест содержит <strong>30 фундаментальных вопросов</strong>, разделенных на 5 смысловых глав.
       </p>
 
-      <button type="button" class="primary-btn" id="start-btn" onclick="startQuiz()">Начать тест</button>
+      <button type="button" class="primary-btn" onclick="startQuiz()">Начать тест</button>
     </div>
 
     <!-- 2. ИНТЕРФЕЙС ТЕСТА -->
@@ -299,7 +296,7 @@
     </div>
 
     <!-- 3. ИНТЕРФЕЙС РЕЗУЛЬТАТОВ -->
-    <div id="results-ui" class="results-box">
+    <div id="results-ui" class="results-box" style="display: none;">
       <h2>Ваша политическая идеология:</h2>
       <div id="ideology-title" class="ideology-name">Загрузка...</div>
       <div id="coordinates-text" class="coordinates-info">X: 0.0, Y: 0.0</div>
@@ -308,7 +305,7 @@
         <canvas id="compassCanvas" width="380" height="380"></canvas>
       </div>
 
-      <button type="button" class="primary-btn" id="restart-btn" onclick="restartQuiz()">Пройти заново</button>
+      <button type="button" class="primary-btn" onclick="restartQuiz()">Пройти заново</button>
     </div>
 
   </div>
@@ -369,6 +366,12 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }
 
+    function showIntro() {
+      document.getElementById('intro-ui').style.display = 'block';
+      document.getElementById('quiz-ui').style.display = 'none';
+      document.getElementById('results-ui').style.display = 'none';
+    }
+
     function startQuiz() {
       document.getElementById('intro-ui').style.display = 'none';
       document.getElementById('quiz-ui').style.display = 'block';
@@ -390,9 +393,7 @@
       currentQuestionIndex = 0;
       userAnswers = [];
       localStorage.removeItem(STORAGE_KEY);
-      document.getElementById('results-ui').style.display = 'none';
-      document.getElementById('quiz-ui').style.display = 'none';
-      document.getElementById('intro-ui').style.display = 'block';
+      showIntro();
     }
 
     function selectOption(score) {
@@ -566,11 +567,14 @@
 
     function loadSavedState() {
       const savedData = localStorage.getItem(STORAGE_KEY);
-      if (!savedData) return;
+      if (!savedData) {
+        showIntro();
+        return;
+      }
 
       try {
         const parsed = JSON.parse(savedData);
-        if (parsed.screen === 'quiz' && Array.isArray(parsed.userAnswers)) {
+        if (parsed.screen === 'quiz' && Array.isArray(parsed.userAnswers) && parsed.userAnswers.length > 0) {
           currentQuestionIndex = parsed.currentQuestionIndex || 0;
           userAnswers = parsed.userAnswers;
           document.getElementById('intro-ui').style.display = 'none';
@@ -579,9 +583,11 @@
         } else if (parsed.screen === 'results' && Array.isArray(parsed.userAnswers)) {
           userAnswers = parsed.userAnswers;
           calculateAndShowResults();
+        } else {
+          showIntro();
         }
       } catch (e) {
-        console.error("Ошибка при восстановлении состояния:", e);
+        showIntro();
       }
     }
 
@@ -590,3 +596,4 @@
   </script>
 </body>
 </html>
+      ctx.font = 'bold 11px sans-se
